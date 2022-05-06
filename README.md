@@ -19,3 +19,4 @@ the DMA after a specific number of update DMA request.
   The number of this repetitive requests is defined by the TIMER2 repetition counter,
 each 1 update requests, the TIMER2 channel 0 duty cycle changes to the next new value
 defined by the buffer.
+![1](https://user-images.githubusercontent.com/39556572/167073374-0e0a425e-99af-4368-99fa-d22eb5fc295d.png)
