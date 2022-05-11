@@ -92,3 +92,13 @@ void SysTick_Handler(void)
 //    led_spark();
     delay_decrement();
 }
+
+void DMA_Channel3_4_IRQHandler(void)
+{
+	if(SET == dma_flag_get(DMA_CH3, DMA_FLAG_FTF)) 
+	{
+		timer_disable(TIMER2);
+		dma_channel_disable(DMA_CH3);
+		dma_flag_clear(DMA_CH3, DMA_FLAG_FTF);
+	}
+}

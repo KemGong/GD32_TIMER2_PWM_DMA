@@ -73,6 +73,17 @@ void gpio_config(void)
     gpio_af_set(GPIOB, GPIO_AF_1, GPIO_PIN_4);
 }
 
+/*!
+    \brief      configure DMA interrupt
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void nvic_config(void)
+{
+    nvic_irq_enable(DMA_Channel3_4_IRQn, 0);
+}
+
 /**
     \brief      configure the DMA peripheral
     \param[in]  none
@@ -87,7 +98,7 @@ void dma_config(void)
     rcu_periph_clock_enable(RCU_DMA);
 
     /* initialize DMA channel4 */
-    dma_deinit(DMA_CH2);
+    dma_deinit(DMA_CH3);
     /* DMA channel4 initialize */
     dma_init_struct.periph_addr  = (uint32_t)TIMER2_CH0CV;
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
@@ -98,12 +109,15 @@ void dma_config(void)
     dma_init_struct.direction    = DMA_MEMORY_TO_PERIPHERAL;
     dma_init_struct.number       = 18;
     dma_init_struct.priority     = DMA_PRIORITY_ULTRA_HIGH;
-    dma_init(DMA_CH2, &dma_init_struct);
+    dma_init(DMA_CH3, &dma_init_struct);
     
     /* enable DMA circulation mode */
-    dma_circulation_enable(DMA_CH2);
+    dma_circulation_enable(DMA_CH3);
     /* enable DMA channel4 */
-    //dma_channel_enable(DMA_CH2);
+    //dma_channel_enable(DMA_CH3);
+		
+    dma_interrupt_enable(DMA_CH3, DMA_INT_FTF);
+
 }
 
 /**
@@ -164,7 +178,7 @@ void timer_config(void)
     /* TIMER0 primary output enable */
     timer_primary_output_config(TIMER2, ENABLE);
     /* TIMER0 update DMA request enable */
-    timer_dma_enable(TIMER2, TIMER_DMA_UPD);//TIMER_DMA_CH0D//TIMER_DMA_UPD
+    timer_dma_enable(TIMER2, TIMER_DMA_CH0D);//TIMER_DMA_CH0D//TIMER_DMA_UPD
     /* auto-reload preload enable */
     timer_auto_reload_shadow_enable(TIMER2);
 
@@ -180,13 +194,13 @@ void send_dshoot(uint16_t *data)
 	buffer[16] = 0;
 	buffer[17] = 0;
     //__disable_irq();
-    dma_transfer_number_config(DMA_CH2, 18);
-	dma_channel_enable(DMA_CH2);
+    dma_transfer_number_config(DMA_CH3, 18);
+	dma_channel_enable(DMA_CH3);
 	timer_enable(TIMER2);
-	while(!dma_flag_get(DMA_CH2, DMA_FLAG_FTF));
+	/*while(!dma_flag_get(DMA_CH3, DMA_FLAG_FTF));
 	timer_disable(TIMER2);
-	dma_channel_disable(DMA_CH2);
-	dma_flag_clear(DMA_CH2, DMA_FLAG_FTF);
+	dma_channel_disable(DMA_CH3);
+	dma_flag_clear(DMA_CH3, DMA_FLAG_FTF);*/
     //__enable_irq();
 	}
 
@@ -204,10 +218,12 @@ int main(void)
     dma_config();
     /* configure the TIMER peripheral */
     timer_config();
+	  /*configure DMA interrupt*/
+    nvic_config();
 
     while (1) {
         send_dshoot(dshoot_data);
-        for(uint32_t i=0 ; i<100000 ; i++)
+        for(uint32_t i=0 ; i<100 ; i++)
         {
             __NOP();
         }
