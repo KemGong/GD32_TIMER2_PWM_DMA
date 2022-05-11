@@ -73,6 +73,17 @@ void gpio_config(void)
     gpio_af_set(GPIOB, GPIO_AF_1, GPIO_PIN_4);
 }
 
+/*!
+    \brief      configure DMA interrupt
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void nvic_config(void)
+{
+    nvic_irq_enable(DMA_Channel3_4_IRQn, 0);
+}
+
 /**
     \brief      configure the DMA peripheral
     \param[in]  none
@@ -104,6 +115,9 @@ void dma_config(void)
     dma_circulation_enable(DMA_CH3);
     /* enable DMA channel4 */
     //dma_channel_enable(DMA_CH3);
+		
+    dma_interrupt_enable(DMA_CH3, DMA_INT_FTF);
+
 }
 
 /**
@@ -183,10 +197,10 @@ void send_dshoot(uint16_t *data)
     dma_transfer_number_config(DMA_CH3, 18);
 	dma_channel_enable(DMA_CH3);
 	timer_enable(TIMER2);
-	while(!dma_flag_get(DMA_CH3, DMA_FLAG_FTF));
+	/*while(!dma_flag_get(DMA_CH3, DMA_FLAG_FTF));
 	timer_disable(TIMER2);
 	dma_channel_disable(DMA_CH3);
-	dma_flag_clear(DMA_CH3, DMA_FLAG_FTF);
+	dma_flag_clear(DMA_CH3, DMA_FLAG_FTF);*/
     //__enable_irq();
 	}
 
@@ -204,10 +218,12 @@ int main(void)
     dma_config();
     /* configure the TIMER peripheral */
     timer_config();
+	  /*configure DMA interrupt*/
+    nvic_config();
 
     while (1) {
         send_dshoot(dshoot_data);
-        for(uint32_t i=0 ; i<100000 ; i++)
+        for(uint32_t i=0 ; i<100 ; i++)
         {
             __NOP();
         }
